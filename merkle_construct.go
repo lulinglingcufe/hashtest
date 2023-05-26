@@ -7,8 +7,26 @@ import (
 	 merkletree "github.com/wealdtech/go-merkletree"
 	 "github.com/wealdtech/go-merkletree/keccak256"
 	 "time"
+	 "encoding/json"
+	 "io/ioutil"
 )
 
+// 将tree结构体存储为文件
+func saveMerkleTreeToFile(tree *merkletree.MerkleTree, filePath string) error {
+	// 将tree结构体转换为JSON格式
+	jsonData, err := json.Marshal(tree)
+	if err != nil {
+		return err
+	}
+
+	// 将JSON数据写入文件
+	err = ioutil.WriteFile(filePath, jsonData, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 const _letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const _letterslen = len(_letters)
@@ -24,7 +42,7 @@ func _randomString(n int) string {
 // Example using the Merkle tree to generate and verify proofs.
 func main() {
 
-	var  dataItems int = 550000//4096 1000000
+	var  dataItems int = 1000000//4096 1000000
 	var  shard_granularity uint64 =  5000//5000  //分片粒度    10000   5000 20000 5000   10000
 
 	//proofs := 10//1234//291   查询位置的数量
@@ -40,9 +58,18 @@ func main() {
 	shard_number  := uint64(math.Ceil( float64(dataItems)/float64(shard_granularity))) //分片的组数
 	tree_ptr := make([]*merkletree.MerkleTree, shard_number)
 
+	basePath := "/home/ubuntu/zgc/projects/src/hashtest/ads/ads_"
+
+
+
+
 	var temp_j uint64 = 0
 	for j := temp_j; j < shard_number; j++ {
 		tree, err := merkletree.NewUsing(data[j* shard_granularity:(j+1)* shard_granularity],keccak256.New(), false)
+
+		filePath := fmt.Sprintf("%s%d", basePath, j)
+		saveMerkleTreeToFile(tree,filePath)
+
 		if err != nil {
 			panic(err)
 		}
