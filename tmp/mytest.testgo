@@ -1,0 +1,388 @@
+package main
+
+import (
+	 "fmt"
+	"math"
+	"bytes"
+	"encoding/gob"	
+	"os"
+	"math/rand"
+	 merkletree "github.com/wealdtech/go-merkletree"
+	 "github.com/wealdtech/go-merkletree/keccak256"
+	 "time"
+	 "strconv"
+)
+
+
+const _letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+const _letterslen = len(_letters)
+
+func _randomString(n int) string {
+	res := make([]byte, n)
+	for i := range res {
+		res[i] = _letters[rand.Int63()%int64(_letterslen)]
+	}
+	return string(res)
+}
+
+// Example using the Merkle tree to generate and verify proofs.
+func main() {
+	var indices=[1636]uint64{69,235,655,2247,4697,4708,4728,4762,9045,9103,9384,10331,12199,14121,15804,16192,16453,16849,17011,17064,19085,19497,19874,20864,23211,23434,23547,23550,23612,23638,24235,26007,26989,28088,29260,29343,30021,30061,30230,30324,30947,31218,31339,33290,34743,36671,36858,37379,42176,42865,42948,43631,44081,44276,45945,46704,46735,48078,48636,51165,52526,54653,57976,58681,58694,58798,58803,58851,59071,59195,59259,59625,59654,59869,59870,60213,60722,60818,61163,61688,62010,63143,63367,63485,63657,64795,67632,68203,68350,68489,68497,68774,68969,69204,69271,69340,69539,70167,71931,73031,73063,73204,74345,74860,76815,78753,78854,79303,79449,79806,80787,82160,82297,82306,82421,82584,83268,83920,84280,84368,84563,84877,85079,85229,85411,85428,85442,85529,85574,85771,85924,86340,86528,86744,86846,87094,87212,87253,87522,87954,88255,88672,88784,89133,89261,89296,89385,90297,90518,90696,91040,91079,91084,91614,91627,91998,93025,93213,93465,93594,93766,94156,94185,94208,94229,94461,94649,94974,95198,95325,95367,95716,95819,95909,97040,97884,98179,99239,99518,99728,100679,100895,101410,101513,101646,102420,102597,104751,104833,104897,104938,105027,105051,105096,105575,106031,106117,106319,106442,106470,106637,108059,108292,108394,109189,110555,111780,111898,112330,112595,112623,113365,113491,114362,116258,119860,121535,121707,121914,121943,122066,122295,122834,123365,123870,124936,125050,125528,125589,128349,129474,129781,131739,132471,132696,133226,135075,135217,136688,139193,139473,140766,141653,141752,142542,142544,143074,143357,143377,143615,144154,144603,144987,145077,145321,146627,148477,148826,150132,151144,151171,151352,151391,151471,151490,151508,151549,151822,152024,152382,152521,152932,153036,153062,153212,153466,153705,154090,154948,155237,155343,155538,156306,156366,156534,156891,157749,157958,158105,159606,159989,160156,161368,161558,161757,165014,165503,165656,165698,168596,168682,168802,169045,169845,170016,170125,170531,170677,171956,173154,173187,173400,173934,174670,174698,174813,175483,175597,175733,176120,176205,177366,177750,178268,178864,180592,180762,180782,180917,181441,181859,181885,182359,187547,188021,188172,188800,189141,192506,200448,205372,208831,208892,209990,210768,210985,212056,215247,216728,217035,219430,219558,220856,221058,224154,224488,225039,226105,227487,227493,227510,228724,229642,229929,230914,232402,233421,234497,234916,235281,235738,235779,235895,236959,237124,237154,237162,238016,238908,239108,241773,241890,243074,243183,243354,243382,243641,246580,246591,246610,246641,246802,246813,246995,247255,247565,248018,248361,248416,249507,251977,253747,255612,255849,258189,261428,261439,261443,261959,262684,262799,264367,266796,269535,271562,274658,275204,277811,278966,279026,279059,279110,279342,279432,279475,279515,279698,280015,280052,280060,280070,280716,280732,280869,281764,281980,282889,283100,283307,283543,283602,285700,285716,285910,286587,286834,287575,287860,288280,288376,288635,289307,292156,292416,293375,293472,293662,293893,294582,294760,294864,294899,294968,295649,295811,296536,297310,297367,297935,298789,300874,304776,305003,305052,305214,305361,305467,305570,305600,305717,305816,305817,305868,305878,305924,306070,306247,306499,306624,306649,307002,307038,307586,307859,308518,309293,309303,309748,310515,310566,311095,311146,312689,315835,318550,320108,321611,321686,321736,321786,321821,322081,322305,322486,322702,322842,323025,323465,323721,323725,323839,323871,323964,324520,324607,324627,325395,325866,326056,326306,327480,327829,329643,330206,331792,334670,335385,335998,336715,336724,336742,336783,336791,336810,336821,336826,337082,337084,337184,337244,337322,337359,337474,337595,337637,337694,337801,337990,337996,338131,338627,338883,338900,339197,340101,341847,341863,342558,342669,346975,347597,348110,348701,349970,350447,350614,350734,350740,350755,350826,350920,350922,350924,350931,350983,351303,351319,351461,351536,351720,351731,351862,352463,352485,353146,353184,353312,353452,354426,354878,354947,354974,355526,356176,357583,359286,360359,361930,363431,363494,363496,363622,363672,363691,363736,363753,363862,364103,364142,364223,364300,364324,364357,364364,364667,364686,364707,364839,364887,365300,365321,365345,365373,365485,365608,365662,366141,366310,366683,366700,366814,367185,368107,368375,370254,370438,370727,372936,375947,377873,378864,379151,379855,380801,380969,381051,381082,381182,381506,381693,381713,381895,382380,383423,384233,385051,385081,385733,385891,385982,386131,386604,388571,388802,389526,390250,391537,391732,391737,391739,391782,396984,397123,397294,397648,398063,399635,400676,401059,402575,403272,403464,403739,405065,405098,405422,405425,405818,406086,406440,406516,408330,409136,411072,411405,411425,412743,413690,413831,415059,415221,415961,416570,419501,419521,419629,419870,420378,420473,420682,420865,420869,420872,420890,420958,421807,422681,422932,423228,423619,425315,426457,426536,426629,426816,426905,426961,427621,429299,429717,429746,430438,430573,430581,430732,430865,431104,431110,431188,431507,432003,432068,432418,432628,432804,432903,432950,433393,433643,434005,434582,434956,435347,435559,436346,437150,437156,438501,439404,439652,439740,440897,440998,441842,442315,442347,443453,443519,444067,446039,448393,448413,450149,451084,451348,451523,451802,451869,451945,452158,454838,456108,456160,459158,459192,459279,459431,459673,460001,460091,460912,461973,462962,463330,464796,465162,465215,465361,465819,465969,466420,466579,466671,466750,466892,466952,467296,467830,468693,469113,469134,469177,469189,469641,469789,469800,469891,469996,470786,471131,472240,472494,472587,472860,473893,476057,476841,477542,477627,478685,478762,478873,480940,481090,481264,481286,482435,482876,483650,483729,484106,484526,484753,484776,484796,485075,486844,486862,487524,487529,487935,487957,488018,488027,488211,488559,488565,488847,489171,489439,489887,490761,491740,491744,492434,492902,493290,493318,493374,493938,493969,494249,494541,495891,496219,496232,496315,496650,496854,496888,496946,497180,497419,497513,497671,497820,498000,498173,498421,498618,499220,499229,499369,499655,500204,500476,500613,501220,501426,501843,502219,502344,502394,502395,502610,503926,504271,504519,504565,504573,504600,504755,505141,505183,506801,507072,507411,510130,510289,510323,510331,510357,510483,510519,510644,511056,511684,511812,511980,512201,512232,512443,512937,512983,513060,513238,513812,514868,515339,515717,516435,516560,516685,516833,516943,517089,517283,517396,517425,517820,518378,519184,519465,519713,520371,520561,520723,520764,520825,521169,521235,521366,521875,521965,521996,522030,522114,522122,522154,522278,522491,522562,522920,523158,523366,523513,523645,523694,524005,524012,524566,524652,524696,524716,524742,524747,524752,524850,525025,525045,525056,525080,525110,525125,525162,525175,525186,525239,525367,525505,525557,525599,525674,525699,525774,525793,525826,525949,526158,526159,526489,526507,526962,527058,527509,527687,527944,528267,528295,528395,528408,528435,528438,528442,528448,528518,528843,529141,529308,529348,529684,530179,530456,531361,531438,531695,531754,531921,532603,532755,532957,533416,533517,533765,534037,534338,534536,534657,534981,535194,536106,536595,539505,543890,544118,544675,546067,546396,546726,547100,547233,547250,547831,548063,548256,548620,548910,549069,549264,550209,550369,551859,551878,551930,554056,554653,554735,555320,555730,555809,556645,556861,557179,557246,560613,563493,563878,563906,563908,566181,566187,566191,566212,569578,570068,570177,570663,571899,572671,572974,573716,573814,575156,578454,579004,581719,584016,584642,584807,586351,586365,587491,590581,590968,591463,592644,595290,597152,597564,598254,598486,600055,600284,600661,600667,600726,601463,601576,602271,602467,603353,603434,603641,604742,606727,606829,606921,607320,607681,610480,613477,615030,615073,615200,615242,615246,615272,615281,615488,615517,615587,615992,616016,617458,619428,622375,627803,627929,628188,628658,629691,630018,631239,631847,632995,633285,634133,634213,634521,635608,636998,637470,645681,658224,658297,658449,658801,659348,660358,661008,661505,661663,662164,662698,662898,662900,663222,663454,663735,663874,663927,664231,666174,667762,667886,667925,669892,669964,670545,670926,671099,671503,678124,678731,679242,679960,682373,683155,684157,684273,685057,685362,685584,685935,686527,687027,688157,688443,688565,690546,691943,693791,694016,694043,694735,695713,697995,698441,699300,699385,699429,700506,700728,701359,703171,703198,703450,704296,705007,705277,706742,708720,708723,708728,708731,708734,708746,710342,710741,710898,710934,711212,711759,711773,711904,713652,713687,714508,716522,716536,716562,716659,716767,719148,719307,719324,719343,719427,719549,719796,720246,720301,720793,722234,723506,723536,723633,724015,724032,724317,724522,724629,724676,725715,726059,727435,727970,727987,728315,728379,728656,729516,729546,730776,731992,732381,732393,732543,733129,734235,734330,734849,734934,735097,735158,736244,736407,736418,738353,738363,738629,738903,738991,739493,739749,740161,740165,740179,740227,740361,742076,742184,742855,743096,743605,744103,744123,745747,745842,745985,747231,748182,748384,748454,748528,749453,750461,750561,752953,753924,753977,754035,754107,754162,754436,754442,754467,754485,755455,755457,755550,756150,756294,762047,764562,765686,769285,771204,771431,774720,776801,780119,780122,780414,780463,782628,783638,784659,784767,784800,784896,784925,784930,784932,784933,785018,786755,787503,787509,787541,787804,787889,788218,788340,788500,789033,790911,791019,791786,792439,792652,792761,793013,793406,795030,795472,795565,796079,797252,797572,799264,799360,799621,799652,800480,800487,802217,802636,802828,803244,804023,804038,804070,804086,804111,804191,804252,804302,804353,804568,806116,806146,806149,806208,806219,806294,806399,806518,806533,806989,807237,807325,808143,808842,808866,809442,809613,810054,810238,812011,812790,815200,815220,815458,815878,817148,817266,818166,818871,821011,821280,821968,821969,822006,823561,823842,824171,824176,824910,825484,825844,826098,826343,827700,827789,828423,828452,830110,830461,832484,832726,833385,833927,834624,834668,834759,835112,835603,836273,836640,836838,839851,840432,840719,840966,841170,841624,843225,843713,844256,844658,846440,854139,859494,861331,861334,861341,865733,866000,868112,868355,868567,868634,869212,869223,869261,869367,869432,870198,876301,877031,887789,889135,889498,896714,903684,904262,904588,905086,905347,906311,907963,915381,915402,915504,915687,916117,916162,916548,919395,919437,920786,921263,922534,923210,923847,924087,924769,926528,928782,929643,930420,932103,932262,932798,932942,934123,935183,936202,936443,936461,939222,940629,941888,942128,942684,944488,945258,946908,946921,948060,949331,949687,950347,951477,951858,952224,952944,953578,954985,955597,960556,961892,961949,962051,962801,963162,963399,964109,964811,964981,965086,965097,966312,966595,966988,967624,967735,968470,968584,969192,969203,969286,971058,971146,971264,971466,971989,972550,973020,973133,973633,973816,973921,974039,974133,974299,974590,975896,978722,982923,983718,986341,987173,987779,987917,988159,989179,994018,995807,997063,997536,997715,998038,998537,999110}
+
+
+   //我给出了indice。但是需要把这个indices按照。首先我需要对indice进行划分。这样才能找到合适的分片tree。
+   //我们假设：在遍历C++ set的时候，已经对indice进行划分了。indice访问的树编号，放在一个列表里面。一个树里面的indice节点，放在一个list里面。
+
+
+
+    var total_indices_number int =1636 //indices的长度
+	var  dataItems int = 100000//4096 1000000
+	var  shard_granularity uint64 =   10000 //分片粒度    10000   5000 20000 5000
+
+	//proofs := 10//1234//291   查询位置的数量
+	data := make([][]byte, dataItems) //数据初始化
+	for i := 0; i < dataItems; i++ {
+		data[i] = []byte(_randomString(700))
+	}
+
+	var indice_tree_number []uint64 //indice的分片树编号
+	//indice_tree_number := make([]uint64, shard_number)
+	//indice_tree_number[1]=0
+	var per_tree_indices [][]uint64 //indice的分片树某个编号中的indices
+	//per_tree_indices := make([][]uint64, shard_number)
+	// var test1=[]uint64{1,2,3}
+	// per_tree_indices = append(per_tree_indices, test1)
+
+    //通过set的遍历，把 indice_tree_number 和 per_tree_indices 初始化好。
+    //首先要找到第一颗树的范围。
+    var  tree_number uint64 = uint64(math.Floor(float64(indices[0])/float64(shard_granularity)))
+	//分片树的编号
+	var bound uint64 = shard_granularity*(1+tree_number)//分片树编号代表的节点范围
+	var indice_number int = 0   //分片中indice的数量
+	indice_tree_number = append(indice_tree_number, tree_number)
+
+	//var total_element_number int = 0
+	for i := 0; i < total_indices_number; i++ { //1234
+		if(indices[i]< bound ){
+			indice_number++
+			//fmt.Printf("This is indice_number++ : %v \n",indice_number)
+
+			if(i == (total_indices_number-1)){ //遍历到最后一个indice元素，且没有增加新的树范围：
+				copyData := make([]uint64, indice_number)  //初始化切片数组
+				copy(copyData, indices[i+1-indice_number:])//复制切片数组
+				//fmt.Printf("This is indices[i-indice_number+1:i] : %v %v \n",i+1-indice_number,i)
+				per_tree_indices = append(per_tree_indices, copyData)//把数组放到 per_tree_indices 里面
+				//total_element_number = total_element_number + indice_number
+				//fmt.Printf("This is indice_number : %v \n",indice_number)
+			}
+
+		} else {
+			//遍历到最后一个indice元素，需要增加新的树范围：
+			if(i == (total_indices_number-1)){ 
+            //(1)把前面的数据放好。 
+			copyData := make([]uint64, indice_number)  //初始化切片数组
+			copy(copyData, indices[i-indice_number:i])//复制切片数组
+			per_tree_indices = append(per_tree_indices, copyData)//把数组放到 per_tree_indices 里面
+
+
+			//(2)重新确定下一个元素所在的分片树的编号
+			tree_number = uint64(math.Floor(float64(indices[i])/float64(shard_granularity)))
+			indice_tree_number = append(indice_tree_number, tree_number)
+			indice_number = 1
+			//把自己放入下一个分片树的数据里面。
+			copyData2 := make([]uint64, indice_number)  //初始化切片数组
+			copyData2[0] = indices[i]
+			per_tree_indices = append(per_tree_indices, copyData2)//把数组放到 per_tree_indices 里面
+
+			} else { 
+			//不是最后一个元素。
+			copyData := make([]uint64, indice_number)  //初始化切片数组
+			copy(copyData, indices[i-indice_number:i])//复制切片数组
+			//fmt.Printf("This is indices[i-indice_number:i] : %v %v \n",i-indice_number,i)
+			per_tree_indices = append(per_tree_indices, copyData)//把数组放到 per_tree_indices 里面
+
+			tree_number = uint64(math.Floor(float64(indices[i])/float64(shard_granularity)))
+			//重新确定下一个元素所在的分片树的编号
+			indice_tree_number = append(indice_tree_number, tree_number)
+			//把 分片树的编号放到 indice_tree_number里面。
+
+			// fmt.Printf("This is tree_number : %v \n",tree_number)
+			// fmt.Printf("This is indice_tree_number : %v \n",indice_tree_number)
+			bound = shard_granularity*(1+tree_number)
+			//fmt.Printf("This is bound : %v \n",bound)
+			//total_element_number = total_element_number + indice_number
+			indice_number = 1
+			//fmt.Printf("This is indice_number : %v \n",indice_number)
+		}
+
+		}
+
+
+	}
+    
+	//var total_element_number int = 0
+	for i, copyData := range per_tree_indices {
+		decrese_for_all_element := indice_tree_number[ indice_tree_number[i] ]*shard_granularity
+		//每个元素要减去相应的：树编号*分片粒度
+        for j := range copyData{
+			copyData[j] = copyData[j]-decrese_for_all_element
+			//total_element_number++
+		}
+	  }
+
+
+	// fmt.Printf("This is indice_tree_number : %v \n",indice_tree_number)
+	// fmt.Printf("This is per_tree_indices : %v \n",per_tree_indices)
+
+	//fmt.Printf("This is total_element_number : %v \n",total_element_number)
+
+
+    //构造hash tree，这个是一开始create index之后就要做的事情。
+	//如果进行分片，那么需要构造 多棵树。我用一个列表 tree_ptr 放这些树。
+	shard_number  := uint64(math.Ceil( float64(dataItems)/float64(shard_granularity))) //分片的组数
+	tree_ptr := make([]*merkletree.MerkleTree, shard_number)
+
+	var temp_j uint64 = 0
+	for j := temp_j; j < shard_number; j++ {
+		tree, err := merkletree.NewUsing(data[j* shard_granularity:(j+1)* shard_granularity],keccak256.New(), false)
+		if err != nil {
+			panic(err)
+		}
+		tree_ptr[j] = tree
+		//fmt.Printf("This is j : %v \n",j)
+	}
+
+
+   start := time.Now() // 获取当前时间（SP生成VO）
+   indice_proof_number := make([]int, len(indice_tree_number)) //indice的分片树proof中的byte数量
+
+   //这里需要构造一个循环。对每一个 indice数组 构造VO。
+   for i, copyData := range per_tree_indices {
+	//对于第i个indice数组
+	increase_for_all_element := indice_tree_number[ indice_tree_number[i] ]*shard_granularity
+	//(1) 每个元素要加上相应的：树编号*分片粒度，从而得到proofdata的位置
+	proofData := make([][]byte, len(copyData) )
+	//copyData就是{1,2,3}的indice数组。
+    
+	//（2）按照copyData生成proofData
+	for j := 0; j < len(copyData); j++ {
+		//fmt.Printf("This is copyData[j] + increase_for_all_element : %v \n",copyData[j]   +  increase_for_all_element)
+		proofData[j] = data[ copyData[j]   +  increase_for_all_element ]
+	}
+	
+	// fmt.Printf("This is i : %v \n",i)
+	// fmt.Printf("This is increase_for_all_element : %v \n",increase_for_all_element)
+    //（3）生成multiProof
+	multiProof, err := tree_ptr[i].GenerateMultiProof(proofData)
+	if err != nil {
+		fmt.Println("tree_ptr[i].GenerateMultiProof failure ", err.Error())
+		return
+	}
+	//fmt.Printf("This is multiProof : %x \n", multiProof)
+
+    //（4）把 multiProof 写入到 文件中。
+	var b bytes.Buffer
+	enc := gob.NewEncoder(&b)
+	enc.Encode(multiProof)
+	i_str := strconv.Itoa(i)
+    s := "hnswvo/output.bin_" + i_str
+    file, err := os.Create(s) //这里要按照循环次数，进行命名 "output.bin"
+
+	if err != nil {
+		fmt.Println("File creation failure ", err.Error())
+		return
+	}
+	defer file.Close() 
+	b_bytes := b.Bytes()
+	indice_proof_number[i] = len(b_bytes)  //把proof的byte长度存储到一个数组中
+	//fmt.Printf("This is b_bytes len : %v \n",len(b_bytes))
+
+	_, err = file.Write(b_bytes)
+	if err != nil {
+		fmt.Println("Encoding failure", err.Error())
+		return
+	}
+  }
+
+
+	elapsed := time.Since(start)
+    fmt.Println("VO generate and sotre Time : ", elapsed)
+	
+	////读取VO
+
+
+	start_read := time.Now() // 获取当前时间
+   //通过一个循环来读取VO。
+   for i, copyData := range per_tree_indices {
+
+	//start_read_proof := time.Now() 
+	//对于第i个indice数组
+	increase_for_all_element := indice_tree_number[ indice_tree_number[i] ]*shard_granularity
+	//(1) 每个元素要加上相应的：树编号*分片粒度，从而得到proofdata的位置
+	proofData := make([][]byte, len(copyData) )
+	//copyData就是{1,2,3}的indice数组。
+    
+	//（2）按照copyData生成proofData
+	for j := 0; j < len(copyData); j++ {
+		//fmt.Printf("This is copyData[j] + increase_for_all_element : %v \n",copyData[j]   +  increase_for_all_element)
+		proofData[j] = data[ copyData[j]   +  increase_for_all_element ]
+	}
+	
+	// read_proof_elapsed := time.Since(start_read_proof)
+    // fmt.Println("read_proof_elapsed Time in VO verfiy : ", read_proof_elapsed)
+
+
+    //(3)读取第i个proof文件
+	i_str := strconv.Itoa(i)
+    s := "hnswvo/output.bin_" + i_str
+	file_read, err := os.Open(s)
+    defer file_read.Close()
+	b_bytes_length := indice_proof_number[i]
+	tmp_read_bytes := make([]byte, b_bytes_length)  //当时存储进文件的bytes长度
+	_, err = file_read.Read(tmp_read_bytes)
+	if err != nil {
+		fmt.Println("Read file failure", err.Error())
+		return
+	}
+	//（4）用proof文件生成MultiProof
+	var b_read bytes.Buffer
+	b_read.Write(tmp_read_bytes) //把读取出来的bytes写入buffer缓冲区
+	dec := gob.NewDecoder(&b_read)
+	var test_read_data merkletree.MultiProof
+	err = dec.Decode(&test_read_data)
+	if err != nil {
+		fmt.Println("Error decoding GOB data:", err)
+		return
+	}
+	//fmt.Printf("This is multiProof test_data : %x \n",test_read_data)
+
+    //（5）client验证VO。 proofData就是:朋友+节点的信息。
+	proven, err := merkletree.VerifyMultiProofUsing(proofData, false, &test_read_data, tree_ptr[i].Root(),keccak256.New())
+	fmt.Printf("This is proven : %v \n",proven)
+  }
+
+	read_elapsed := time.Since(start_read)
+    fmt.Println("VO read and verfiy Time : ", read_elapsed)
+
+
+
+
+
+
+
+
+	// start := time.Now() // 获取当前时间（SP生成VO）
+
+	// indices := make([]uint64, proofs)
+	// proofData := make([][]byte, proofs)
+
+
+	// for j := 0; j < proofs; j++ {
+	// 	//indices[j] = uint64(rand.Int31n(int32(dataItems)))
+	// 	proofData[j] = data[indices[j]]
+	// }
+
+	// //start := time.Now()
+    // //SP生成VO。
+	// multiProof, err := tree.GenerateMultiProof(proofData)
+	// //multiProof, err := tree_ptr[1].GenerateMultiProof(proofData)
+
+
+	// //fmt.Printf("This is multiProof : %x \n",multiProof)
+	// // elapsed := time.Since(start)
+    // // fmt.Println("VO generate Time : ", elapsed)
+	
+	// ////把VO写入文件。
+
+	// //start_write := time.Now()
+	// var b bytes.Buffer
+	// enc := gob.NewEncoder(&b)
+	// enc.Encode(multiProof)
+    // file, err := os.Create("output.bin")
+	// if err != nil {
+	// 	fmt.Println("File creation failure ", err.Error())
+	// 	return
+	// }
+	// defer file.Close() 
+	// b_bytes := b.Bytes()
+	// //fmt.Printf("This is b_bytes len : %v \n",len(b_bytes))
+
+	// _, err = file.Write(b_bytes)
+	// if err != nil {
+	// 	fmt.Println("Encoding failure", err.Error())
+	// 	return
+	// }
+	// // elapsed_write := time.Since(start_write)
+    // // fmt.Println("VO sotre Time : ", elapsed_write)
+	// elapsed := time.Since(start)
+    // fmt.Println("VO generate and sotre Time : ", elapsed)
+	
+	
+	// ////读取VO
+	// start_read := time.Now() // 获取当前时间
+
+	// file_read, err := os.Open("output.bin")
+    // defer file_read.Close()
+	// tmp_read_bytes := make([]byte, len(b_bytes))
+	// _, err = file_read.Read(tmp_read_bytes)
+	// if err != nil {
+	// 	fmt.Println("Read file failure", err.Error())
+	// 	return
+	// }
+	// var b_read bytes.Buffer
+	// b_read.Write(tmp_read_bytes) //把读取出来的bytes写入buffer缓冲区
+	// dec := gob.NewDecoder(&b_read)
+	// var test_read_data merkletree.MultiProof
+	// err = dec.Decode(&test_read_data)
+	// if err != nil {
+	// 	fmt.Println("Error decoding GOB data:", err)
+	// 	return
+	// }
+	// //fmt.Printf("This is multiProof test_data : %x \n",test_read_data)
+
+    // //client验证VO。 proofData就是在获取朋友+节点的信息。
+	// proven, err := merkletree.VerifyMultiProofUsing(proofData, false, multiProof, tree.Root(),keccak256.New())
+	// //proven, err := merkletree.VerifyMultiProofUsing(proofData, false, &test_data, tree.Root(),keccak256.New())
+	
+	// //VerifyMultiProofUsing([][]byte{data}, false, proof, tree.Root(), test.hashType)
+	// //merkletree.VerifyMultiProof(proofData, false, multiProof, tree.Root())
+	// fmt.Printf("This is proven : %v \n",proven)
+
+	// read_elapsed := time.Since(start_read)
+    // fmt.Println("VO read and verfiy Time : ", read_elapsed)
+	
+	// // // Data for the tree
+	// // data := [][]byte{
+	// // 	[]byte("Foossssssssssssssssssssssssssssssssssssssssssssss"),
+	// // 	[]byte("Bar"),
+	// // 	[]byte("Baz"),
+	// // }
+
+	// // // Create the tree
+	// // //tree, err := merkletree.NewUsing(data, keccak256.New(), false)
+	// // tree, err := merkletree.NewUsing(data, keccak256.New(), false)
+	// // if err != nil {
+	// // 	panic(err)
+	// // }
+
+	// // // Fetch the root hash of the tree
+	// // root := tree.Root()
+
+	// // baz := data[2]
+	// // // Generate a proof for 'Baz'
+	// // proof, err := tree.GenerateProof(baz, 0)//
+	// // if err != nil {
+	// // 	panic(err)
+	// // }
+	// // fmt.Printf("This is proof :%v \n",proof)
+
+	// // // Verify the proof for 'Baz'
+	// // verified, err := merkletree.VerifyProof(baz, false, proof, [][]byte{root})
+	// // if err != nil {
+	// // 	panic(err)
+	// // }
+	// // if !verified {
+	// // 	panic("failed to verify proof for Baz")
+	// // }
+	// // fmt.Printf("This is verify : %v \n",verified)
+}
